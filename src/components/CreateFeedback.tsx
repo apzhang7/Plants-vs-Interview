@@ -5,17 +5,12 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
+import { useUser } from "@clerk/nextjs";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
 import { Textarea } from "@/components/ui/textarea";
+import updateUserAfterFeedback from "@/components/UpdateProfileInfo";
 
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
@@ -36,17 +31,11 @@ export default function CreateFeedback({
   industry,
   major,
 }: CreateFeedbackProps) {
-  const [questionResponse, setQuestionResponse] = useState("");
-  const [questionLoading, setQuestionLoading] = useState(false);
+  const { user } = useUser();
 
-  const [generatedQuestion, setGeneratedQuestion] = useState("");
   const [userResponse, setUserResponse] = useState("");
   const [feedbackResponse, setFeedbackResponse] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
-  const [currentValues, setCurrentValues] = useState({
-    industry: "",
-    major: "",
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,51 +45,12 @@ export default function CreateFeedback({
     },
   });
 
-  // const handleQuestionSubmit = async (values: z.infer<typeof formSchema>) => {
-  //   setQuestionLoading(true);
-  //   try {
-  //     const { industry, major, question, userResponse } = values;
-  //     setCurrentValues({ industry, major });
-  //     console.log("Submitting values:", { industry, major });
-
-  //     const response = await fetch("http://localhost:3000/api/questions", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         industry,
-  //         major,
-  //         question,
-  //         userResponse,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`API responded with status: ${response.status}`);
-  //     }
-
-  //     const data = await response.json();
-  //     console.log("Question API response:", data);
-  //     setQuestionResponse(JSON.stringify(data, null, 2));
-
-  //     // Extract the question from response
-  //     if (data.question) {
-  //       setGeneratedQuestion(data.question);
-  //     }
-  //   } catch (error) {
-  //     console.error("Question API error:", error);
-  //     setQuestionResponse(`Error: ${error}`);
-  //   } finally {
-  //     setQuestionLoading(false);
-  //   }
-  // };
-
   const handleFeedbackSubmit = async () => {
     if (!userResponse.trim()) return;
 
     setFeedbackLoading(true);
     try {
+      console.log("user response:", userResponse);
       const response = await fetch("http://localhost:3000/api/feedback", {
         method: "POST",
         headers: {
@@ -119,10 +69,30 @@ export default function CreateFeedback({
       }
 
       const data = await response.json();
-      setFeedbackResponse(JSON.stringify(data, null, 2));
-      console.log("userResponse:", userResponse);
-      console.log("industry:", industry);
       console.log("Feedback API response:", data);
+      setFeedbackResponse(JSON.stringify(data, null, 2));
+
+      const score = data.score;
+      const numericScore = parseInt(score.split("/")[0]);
+
+      if (user) {
+        const userId = user.id;
+        await updateUserAfterFeedback(userId, numericScore);
+
+        const userDocRef = collection(db, "users", userId, "questions");
+
+        const newQuestionDoc = doc(userDocRef);
+        await setDoc(newQuestionDoc, {
+          question: question,
+          response: userResponse,
+          industry: industry,
+          major: major,
+          timestamp: new Date(),
+        });
+      }
+      // console.log("userResponse:", userResponse);
+      // console.log("industry:", industry);
+      // track how many questions answered by user
     } catch (error) {
       setFeedbackResponse(`Error: ${error}`);
     } finally {
@@ -147,7 +117,7 @@ export default function CreateFeedback({
               />
 
               <Button
-                onClick={handleFeedbackSubmit}
+                type={"submit"}
                 disabled={!userResponse.trim() || feedbackLoading}
                 className="bg-[#4CAF50] hover:bg-[#388E3C] text-white mt-3"
               >

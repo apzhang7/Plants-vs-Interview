@@ -9,6 +9,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import Image from "next/image";
+import CreateQuestion from "@/components/CreateQuestion";
 
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
@@ -52,6 +53,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <CreateQuestion />
       <div className="items-center justify-center flex-grow">
         <SignedIn>
           <div>
