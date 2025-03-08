@@ -15,11 +15,9 @@ const geistMono = Geist_Mono({
 
 export default function Navbar() {
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} antialiased pt-4`}
-    >
+    <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       {/* Navbar */}
-      <header className="flex justify-between items-center p-4 bg-gray-100 shadow-md">
+      <header className="flex justify-between items-center p-4 bg-hidden shadow-md">
         {/* Left side: App name */}
         <div className="text-xl font-bold text-green-600">
           plant vs interview
