@@ -2,6 +2,7 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import ClientUserInfo from "../components/ClientUserInfo";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +21,7 @@ export default function Navbar() {
       <header className="flex justify-between items-center p-12 bg-hidden mt-2">
         {/* Left side: App name */}
         <div className="text-2xl font-bold text-black ml-0">
-          plants vs. interview
+          <Link href="/">plants vs. interview</Link>
         </div>
 
         {/* Right side: User info */}

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Form } from "@/components/ui/form";
 import { useUser } from "@clerk/nextjs";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
@@ -103,30 +102,30 @@ export default function CreateFeedback({
   return (
     <div className="border p-4 rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Your Response</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFeedbackSubmit)}>
-          <div className="mt-6">
-            <div className="mt-4">
-              <h3 className="font-bold text-lg">Your Answer:</h3>
-              <Textarea
-                value={userResponse}
-                onChange={(e) => setUserResponse(e.target.value)}
-                placeholder="Type your answer to the question here..."
-                rows={5}
-                className="w-full mt-2 p-3 border rounded"
-              />
 
-              <Button
-                type={"submit"}
-                disabled={!userResponse.trim() || feedbackLoading}
-                className="bg-[#4CAF50] hover:bg-[#388E3C] text-white mt-3"
-              >
-                {feedbackLoading ? "Processing..." : "Get Feedback"}
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
+      {/* Remove the Form component and keep just the regular form */}
+      <div className="mt-6">
+        <div className="mt-4">
+          <h3 className="font-bold text-lg">Your Answer:</h3>
+          <Textarea
+            value={userResponse}
+            onChange={(e) => setUserResponse(e.target.value)}
+            placeholder="Type your answer to the question here..."
+            rows={5}
+            className="w-full mt-2 p-3 border rounded"
+          />
+
+          {/* Change button to type="button" with onClick handler */}
+          <Button
+            type="button"
+            onClick={handleFeedbackSubmit}
+            disabled={!userResponse.trim() || feedbackLoading}
+            className="bg-[#4CAF50] hover:bg-[#388E3C] text-white mt-3"
+          >
+            {feedbackLoading ? "Processing..." : "Get Feedback"}
+          </Button>
+        </div>
+      </div>
 
       {feedbackResponse && (
         <div className="mt-4">
