@@ -122,7 +122,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.navbar-spacing {
-  padding-top: 3rem;
-}
