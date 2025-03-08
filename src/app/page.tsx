@@ -1,15 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import CreateQuestion from "@/components/CreateQuestion";
-import CreateFeedback from "@/components/CreateFeedback";
-import { useAuth, useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
+import Image from "next/image";
 
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
@@ -17,32 +16,6 @@ const formSchema = z.object({
 });
 
 export default function Home() {
-  const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
-  const [transcribeResponse, setTranscribeResponse] = useState("");
-  const [transcribeLoading, setTranscribeLoading] = useState(false);
-
-  const handleResponse = async () => {
-    if (!transcribeFile) return;
-
-    setTranscribeLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", transcribeFile);
-
-      const response = await fetch("http://localhost:3000/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      setTranscribeResponse(JSON.stringify(data, null, 2));
-    } catch (error) {
-      setTranscribeResponse(`Error: ${error}`);
-    } finally {
-      setTranscribeLoading(false);
-    }
-  };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,7 +24,6 @@ export default function Home() {
     },
   });
 
-  const { isSignedIn } = useAuth(); // For authentication status
   const { user } = useUser(); // For accessing the user object
 
   const [firestoreData, setFirestoreData] = useState(null); // State to store Firestore data
@@ -79,15 +51,9 @@ export default function Home() {
   }, [user]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        Interview Buddy - API Tester
-      </h1>
-
-      <CreateQuestion />
-
-      <main className="flex flex-col items-center justify-center flex-grow p-8">
-        {isSignedIn ? (
+    <div className="min-h-screen">
+      <div className="items-center justify-center flex-grow">
+        <SignedIn>
           <div>
             <p>Welcome, {user?.firstName}!</p>
 
@@ -103,22 +69,46 @@ export default function Home() {
               <p>No Firestore data found.</p>
             )}
           </div>
-        ) : (
-          <div>
-            <p>Please sign in to continue.</p>
-            <SignInButton mode="modal">
-              <button className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
-                Sign in
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-700 transition duration-300">
-                Sign up
-              </button>
-            </SignUpButton>
+          <SignOutButton />
+        </SignedIn>
+        <SignedOut>
+          <div className="flex justify-between bg-[#C1DEC3] min-h-screen items-center gap-8">
+            <div className="absolute top-6 left-8 z-10">
+              <h1 className="text-2xl font-bold text-black">
+                plants vs. interview
+              </h1>
+            </div>
+            <div className="flex-col p-8 rounded-lg">
+              <h1 className="text-8xl font-semibold text-start mb-4">
+                Grow your interviewing skills
+                <span className="text-4xl text-start font-light italic block mt-2">
+                  with our AI-powered interview assistant.
+                </span>
+              </h1>
+              <div className="flex gap-4">
+                <SignUpButton mode="modal">
+                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md hover:gray transition duration-300">
+                    sign up
+                  </button>
+                </SignUpButton>
+                <SignInButton mode="modal">
+                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md hover:gray transition duration-300">
+                    log in
+                  </button>
+                </SignInButton>
+              </div>
+            </div>
+            <div className="flex flex-col bg-white min-h-screen justify-center items-center px-16">
+              <Image
+                src="/plant1stage1new.png"
+                alt="Plant"
+                width={500}
+                height={700}
+              />
+            </div>
           </div>
-        )}
-      </main>
+        </SignedOut>
+      </div>
     </div>
   );
 }
