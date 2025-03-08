@@ -7,7 +7,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import CreateQuestion from "@/components/CreateQuestion";
 import CreateFeedback from "@/components/CreateFeedback";
-
+import { useAuth, useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
+import Link from "next/link";
+//
+import { useEffect, useState } from "react";
+import { doc, getDocs, setDoc } from "firebase/firestore";
+import { db } from '../firebase'
+        
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
   major: z.string().nonempty("Major is required"),
@@ -39,104 +45,145 @@ export default function Home() {
       setTranscribeLoading(false);
     }
   };
-
-  const form = useForm<z.infer<typeof formSchema>>({
+    
+   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       industry: "",
       major: "",
     },
   });
+    
+  const { isSignedIn } = useAuth(); // For authentication status
+  const { user } = useUser(); // For accessing the user object
 
-  // const handleFeedbackSubmit = async () => {
-  //   if (!feedback.trim()) return;
+  const [firestoreData, setFirestoreData] = useState(null); // State to store Firestore data
+  const [loading, setLoading] = useState(false); // Loading state for data fetch
 
-  //   setFeedbackLoading(true);
-  //   try {
-  //     const response = await fetch("http://localhost:3000/api/feedback", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ feedback }),
-  //     });
+  useEffect(() => {
+    if (user) {
+      const userData = {
+        email: user.emailAddresses[0]?.emailAddress || "",
+        fullname: `${user.firstName} ${user.lastName}` || "",
+      };
 
-  //     const data = await response.json();
-  //     setFeedbackResponse(JSON.stringify(data, null, 2));
-  //   } catch (error) {
-  //     setFeedbackResponse(`Error: ${error}`);
-  //   } finally {
-  //     setFeedbackLoading(false);
-  //   }
-  // };
+      if (userData.email && userData.fullname) {
+        const userDocRef = doc(db, "users", user.id);
+
+        setDoc(userDocRef, userData)
+        .then(() => {
+          console.log("User data stored successfully");
+        })
+        .catch((error) => {
+          console.error("Error storing user data:", error);
+        });
+      }
+    }
+  }, [user]);
 
   return (
-    <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
+    <div className="flex flex-col min-h-screen">
       <h1 className="text-4xl font-bold text-center mb-8">
         Interview Buddy - API Tester
       </h1>
+      
+      <CreateQuestion />
+        
+      <main className="flex flex-col items-center justify-center flex-grow p-8">
+        {isSignedIn ? (
+          <div>
+            <p>Welcome, {user?.firstName}!</p>
 
-      <div className="">
-        {/* Transcribe Route Tester */}
-        {/* <div className="border p-4 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Transcribe Route</h2>
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => setTranscribeFile(e.target.files?.[0] || null)}
-            className="mb-4"
-          />
-          <Button
-            onClick={handleTranscribe}
-            disabled={!transcribeFile || transcribeLoading}
-            className=""
-          >
-            {transcribeLoading ? "Processing..." : "Transcribe Audio"}
-          </Button>
-
-          {transcribeResponse && (
-            <div className="mt-4">
-              <h3 className="font-bold">Response:</h3>
-              <pre className="bg-gray-100 p-2 rounded overflow-auto mt-2 text-sm">
-                {transcribeResponse}
-              </pre>
-            </div>
-          )}
-        </div> */}
-
-        {/* Questions Route Tester */}
-        <CreateQuestion />
-
-        {/* Feedback Route Tester */}
-        {/* <div className="border p-4 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Feedback Route</h2>
-          <textarea
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Enter your feedback here"
-            className="w-full p-2 border rounded mb-4"
-            rows={4}
-          />
-          <Button
-            onClick={handleFeedbackSubmit}
-            disabled={!feedback.trim() || feedbackLoading}
-            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
-          >
-            {feedbackLoading ? "Processing..." : "Submit Feedback"}
-          </Button>
-
-          {feedbackResponse && (
-            <div className="mt-4">
-              <h3 className="font-bold">Response:</h3>
-              <pre className="bg-gray-100 p-2 rounded overflow-auto mt-2 text-sm">
-                {feedbackResponse}
-              </pre>
-            </div>
-          )}
-        </div>
-      </div>
-    </div> */}
-      </div>
+            {/* Display loading state or fetched Firestore data */}
+            {loading ? (
+              <p>Loading Firestore data...</p>
+            ) : firestoreData ? (
+              <div>
+                <h3>Firestore Data:</h3>
+                {/* <pre>{JSON.stringify(firestoreData, null, 2)}</pre> */}
+              </div>
+            ) : (
+              <p>No Firestore data found.</p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p>Please sign in to continue.</p>
+            <SignInButton mode="modal">
+              <button className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+                Sign in
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-700 transition duration-300">
+                Sign up
+              </button>
+            </SignUpButton>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
