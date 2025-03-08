@@ -1,16 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import CreateQuestion from "@/components/CreateQuestion";
-import CreateFeedback from "@/components/CreateFeedback";
-import { useAuth, useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import Image from "next/image";
 
 const formSchema = z.object({
@@ -27,7 +24,6 @@ export default function Home() {
     },
   });
 
-  const { isSignedIn } = useAuth(); // For authentication status
   const { user } = useUser(); // For accessing the user object
 
   const [firestoreData, setFirestoreData] = useState(null); // State to store Firestore data
@@ -56,10 +52,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* <h1 className="text-4xl font-bold text-center mb-8">
-        // Interview Buddy - API Tester //
-      </h1>
-      // <CreateQuestion /> */}
       <div className="items-center justify-center flex-grow">
         <SignedIn>
           <div>
@@ -77,6 +69,7 @@ export default function Home() {
               <p>No Firestore data found.</p>
             )}
           </div>
+          <SignOutButton />
         </SignedIn>
         <SignedOut>
           <div className="flex justify-between bg-[#C1DEC3] min-h-screen items-center gap-8">
