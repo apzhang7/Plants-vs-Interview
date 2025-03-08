@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -33,17 +33,24 @@ interface CreateFeedbackProps {
 
 export default function CreateFeedback({
   question,
+  response,
   industry,
   major,
 }: CreateFeedbackProps) {
   const { user } = useUser();
 
-  const [userResponse, setUserResponse] = useState("");
+  const [userResponse, setUserResponse] = useState(response || "");
   const [feedbackResponse, setFeedbackResponse] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [questionDocRef, setQuestionDocRef] =
     useState<DocumentReference | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (response) {
+      setUserResponse(response);
+    }
+  }, [response]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

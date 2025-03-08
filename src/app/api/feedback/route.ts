@@ -97,8 +97,8 @@ const feedback = z.object({
 
 export async function POST(req: Request) {
   const openai = new OpenAI({ apiKey: String(process.env.OPENAI_KEY) });
-  const { question, userResponse, industry, major } = await req.json();
-  const input = `User Industry: ${industry}\nUser Major: ${major}\nUser Question: ${question}\nUser Response: ${userResponse}`;
+  const { question, response, industry, major } = await req.json();
+  const input = `User Industry: ${industry}\nUser Major: ${major}\nUser Question: ${question}\nUser Response: ${response}`;
 
   if (!req.body) {
     throw new Error("Request body is null");
