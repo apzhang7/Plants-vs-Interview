@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,12 +7,10 @@ import { z } from "zod";
 import CreateQuestion from "@/components/CreateQuestion";
 import CreateFeedback from "@/components/CreateFeedback";
 import { useAuth, useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
-import Link from "next/link";
-//
 import { useEffect, useState } from "react";
 import { doc, getDocs, setDoc } from "firebase/firestore";
-import { db } from '../firebase'
-        
+import { db } from "../firebase";
+
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
   major: z.string().nonempty("Major is required"),
@@ -45,15 +42,15 @@ export default function Home() {
       setTranscribeLoading(false);
     }
   };
-    
-   const form = useForm<z.infer<typeof formSchema>>({
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       industry: "",
       major: "",
     },
   });
-    
+
   const { isSignedIn } = useAuth(); // For authentication status
   const { user } = useUser(); // For accessing the user object
 
@@ -71,12 +68,12 @@ export default function Home() {
         const userDocRef = doc(db, "users", user.id);
 
         setDoc(userDocRef, userData)
-        .then(() => {
-          console.log("User data stored successfully");
-        })
-        .catch((error) => {
-          console.error("Error storing user data:", error);
-        });
+          .then(() => {
+            console.log("User data stored successfully");
+          })
+          .catch((error) => {
+            console.error("Error storing user data:", error);
+          });
       }
     }
   }, [user]);
@@ -86,9 +83,9 @@ export default function Home() {
       <h1 className="text-4xl font-bold text-center mb-8">
         Interview Buddy - API Tester
       </h1>
-      
+
       <CreateQuestion />
-        
+
       <main className="flex flex-col items-center justify-center flex-grow p-8">
         {isSignedIn ? (
           <div>
@@ -125,65 +122,3 @@ export default function Home() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
