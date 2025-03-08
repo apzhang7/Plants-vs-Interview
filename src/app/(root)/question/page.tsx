@@ -1,10 +1,10 @@
 import Image from "next/image";
+import CreateQuestion from "@/components/CreateQuestion";
 
-export default function Question(){
-
-    return (
-        <div>
-            <h1> hello </h1>
-        </div>
-    )
+export default function Question() {
+  return (
+    <div className="min-h-screen">
+      <CreateQuestion />
+    </div>
+  );
 }
