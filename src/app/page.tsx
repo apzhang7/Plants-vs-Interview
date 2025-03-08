@@ -1,13 +1,59 @@
 "use client";
 
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import CreateQuestion from "@/components/CreateQuestion";
+import CreateFeedback from "@/components/CreateFeedback";
 import { useAuth, useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 //
 import { useEffect, useState } from "react";
 import { doc, getDocs, setDoc } from "firebase/firestore";
 import { db } from '../firebase'
+        
+const formSchema = z.object({
+  industry: z.string().nonempty("Industry is required"),
+  major: z.string().nonempty("Major is required"),
+});
 
 export default function Home() {
+  const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
+  const [transcribeResponse, setTranscribeResponse] = useState("");
+  const [transcribeLoading, setTranscribeLoading] = useState(false);
+
+  const handleResponse = async () => {
+    if (!transcribeFile) return;
+
+    setTranscribeLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", transcribeFile);
+
+      const response = await fetch("http://localhost:3000/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      setTranscribeResponse(JSON.stringify(data, null, 2));
+    } catch (error) {
+      setTranscribeResponse(`Error: ${error}`);
+    } finally {
+      setTranscribeLoading(false);
+    }
+  };
+    
+   const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      industry: "",
+      major: "",
+    },
+  });
+    
   const { isSignedIn } = useAuth(); // For authentication status
   const { user } = useUser(); // For accessing the user object
 
@@ -37,6 +83,12 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <h1 className="text-4xl font-bold text-center mb-8">
+        Interview Buddy - API Tester
+      </h1>
+      
+      <CreateQuestion />
+        
       <main className="flex flex-col items-center justify-center flex-grow p-8">
         {isSignedIn ? (
           <div>
