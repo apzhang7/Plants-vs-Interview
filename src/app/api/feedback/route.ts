@@ -14,7 +14,7 @@ Does the response follow a logical structure (e.g., STAR: Situation, Task, Actio
 Is the explanation clear and easy to follow, or does it need more organization?
 Relevance & Depth:
 
-Does the user’s response directly address the question and demonstrate industry-specific competencies?
+Does the user’s response directly address the gpt generated behavioral question and demonstrate industry-specific competencies?
 Are there specific details, technologies, or methodologies relevant to their field?
 Impact & Measurability:
 
@@ -36,11 +36,11 @@ const feedback = z.object({
   weaknesses: z.string(), // Identify weaknesses or missing elements
   improvements: z.string(), // Explain how to improve the response
   summary: z.string(), // Concise wrap-up of the overall feedback
-  score: z.string(), // Provide a score or rating based on the evaluation out of 10
+  score: z.string(), // Provide a score or rating based on the evaluation out of 10 (e.g., "8/10")
 });
 How to Provide Feedback:
 1. Strengths – Highlight what was done well
-Identify and praise the user's strong points, such as clear structure, relevant examples, or impactful results.
+Identify and praise the user's strong points, such as clear structure, relevant examples, or impactful results. If the response is already strong, suggest ways to make it even better.
 Example: "Your response was well-structured using the STAR format. You clearly described the problem, your approach, and the outcome. The way you quantified the results (e.g., 'reduced processing time by 30%') makes your response compelling."
 2. Weaknesses – Identify areas for improvement
 Point out vague or underdeveloped sections and suggest how they can be made stronger.
