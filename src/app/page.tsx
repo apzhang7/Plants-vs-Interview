@@ -1,101 +1,142 @@
-import Image from "next/image";
+"use client";
+
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import CreateQuestion from "@/components/CreateQuestion";
+import CreateFeedback from "@/components/CreateFeedback";
+
+const formSchema = z.object({
+  industry: z.string().nonempty("Industry is required"),
+  major: z.string().nonempty("Major is required"),
+});
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [transcribeFile, setTranscribeFile] = useState<File | null>(null);
+  const [transcribeResponse, setTranscribeResponse] = useState("");
+  const [transcribeLoading, setTranscribeLoading] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleResponse = async () => {
+    if (!transcribeFile) return;
+
+    setTranscribeLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", transcribeFile);
+
+      const response = await fetch("http://localhost:3000/api/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      setTranscribeResponse(JSON.stringify(data, null, 2));
+    } catch (error) {
+      setTranscribeResponse(`Error: ${error}`);
+    } finally {
+      setTranscribeLoading(false);
+    }
+  };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      industry: "",
+      major: "",
+    },
+  });
+
+  // const handleFeedbackSubmit = async () => {
+  //   if (!feedback.trim()) return;
+
+  //   setFeedbackLoading(true);
+  //   try {
+  //     const response = await fetch("http://localhost:3000/api/feedback", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ feedback }),
+  //     });
+
+  //     const data = await response.json();
+  //     setFeedbackResponse(JSON.stringify(data, null, 2));
+  //   } catch (error) {
+  //     setFeedbackResponse(`Error: ${error}`);
+  //   } finally {
+  //     setFeedbackLoading(false);
+  //   }
+  // };
+
+  return (
+    <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
+      <h1 className="text-4xl font-bold text-center mb-8">
+        Interview Buddy - API Tester
+      </h1>
+
+      <div className="">
+        {/* Transcribe Route Tester */}
+        {/* <div className="border p-4 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Transcribe Route</h2>
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setTranscribeFile(e.target.files?.[0] || null)}
+            className="mb-4"
+          />
+          <Button
+            onClick={handleTranscribe}
+            disabled={!transcribeFile || transcribeLoading}
+            className=""
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {transcribeLoading ? "Processing..." : "Transcribe Audio"}
+          </Button>
+
+          {transcribeResponse && (
+            <div className="mt-4">
+              <h3 className="font-bold">Response:</h3>
+              <pre className="bg-gray-100 p-2 rounded overflow-auto mt-2 text-sm">
+                {transcribeResponse}
+              </pre>
+            </div>
+          )}
+        </div> */}
+
+        {/* Questions Route Tester */}
+        <CreateQuestion />
+
+        {/* Feedback Route Tester */}
+        {/* <div className="border p-4 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Feedback Route</h2>
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Enter your feedback here"
+            className="w-full p-2 border rounded mb-4"
+            rows={4}
+          />
+          <Button
+            onClick={handleFeedbackSubmit}
+            disabled={!feedback.trim() || feedbackLoading}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
           >
-            Read our docs
-          </a>
+            {feedbackLoading ? "Processing..." : "Submit Feedback"}
+          </Button>
+
+          {feedbackResponse && (
+            <div className="mt-4">
+              <h3 className="font-bold">Response:</h3>
+              <pre className="bg-gray-100 p-2 rounded overflow-auto mt-2 text-sm">
+                {feedbackResponse}
+              </pre>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    </div> */}
+      </div>
     </div>
   );
 }
