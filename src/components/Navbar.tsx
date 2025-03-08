@@ -17,14 +17,16 @@ export default function Navbar() {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       {/* Navbar */}
-      <header className="flex justify-between items-center p-4 bg-hidden shadow-md">
+      <header className="flex justify-between items-center p-12 bg-hidden mt-2">
         {/* Left side: App name */}
-        <div className="text-xl font-bold text-green-600">
-          plant vs interview
+        <div className="text-2xl font-bold text-black ml-0">
+          plants vs. interview
         </div>
 
         {/* Right side: User info */}
-        <ClientUserInfo />
+        <div className="mr-6">
+          <ClientUserInfo />
+        </div>
       </header>
     </div>
   );
