@@ -6,7 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useUser } from "@clerk/nextjs";
-import { collection, doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentReference,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { Textarea } from "@/components/ui/textarea";
 import updateUserAfterFeedback from "@/components/UpdateProfileInfo";
@@ -35,6 +41,9 @@ export default function CreateFeedback({
   const [userResponse, setUserResponse] = useState("");
   const [feedbackResponse, setFeedbackResponse] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [questionDocRef, setQuestionDocRef] =
+    useState<DocumentReference | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -81,12 +90,15 @@ export default function CreateFeedback({
         const userDocRef = collection(db, "users", userId, "questions");
 
         const newQuestionDoc = doc(userDocRef);
+        setQuestionDocRef(newQuestionDoc);
+
         await setDoc(newQuestionDoc, {
           question: question,
           response: userResponse,
           industry: industry,
           major: major,
           timestamp: new Date(),
+          bookmarked: false,
         });
       }
       // console.log("userResponse:", userResponse);
@@ -98,12 +110,31 @@ export default function CreateFeedback({
       setFeedbackLoading(false);
     }
   };
+  const handleBookmarkSubmit = async () => {
+    if (!questionDocRef || !user) return;
 
+    try {
+      // Update the database first
+      const newBookmarkState = !isBookmarked;
+      await updateDoc(questionDocRef, {
+        bookmarked: newBookmarkState,
+      });
+
+      // Then update the UI state to match
+      setIsBookmarked(newBookmarkState);
+
+      console.log(
+        `Question ${
+          newBookmarkState ? "bookmarked" : "unbookmarked"
+        } successfully`
+      );
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+    }
+  };
   return (
     <div className="border p-4 rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Your Response</h2>
-
-      {/* Remove the Form component and keep just the regular form */}
       <div className="mt-6">
         <div className="mt-4">
           <h3 className="font-bold text-lg">Your Answer:</h3>
@@ -115,7 +146,6 @@ export default function CreateFeedback({
             className="w-full mt-2 p-3 border rounded"
           />
 
-          {/* Change button to type="button" with onClick handler */}
           <Button
             type="button"
             onClick={handleFeedbackSubmit}
@@ -123,6 +153,14 @@ export default function CreateFeedback({
             className="bg-[#4CAF50] hover:bg-[#388E3C] text-white mt-3"
           >
             {feedbackLoading ? "Processing..." : "Get Feedback"}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleBookmarkSubmit}
+            disabled={!questionDocRef}
+          >
+            {isBookmarked ? "Bookmarked" : "Bookmark"}
           </Button>
         </div>
       </div>
