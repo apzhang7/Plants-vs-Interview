@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import Image from "next/image";
 import CreateQuestion from "@/components/CreateQuestion";
+import PlantUpdate from "@/components/PlantFile";
 
 const formSchema = z.object({
   industry: z.string().nonempty("Industry is required"),
@@ -107,7 +108,8 @@ export default function Home() {
                 </Link>
               </div>
               <div className="flex justify-center items-center">
-                <Image src="/p1s3.png" width={400} height={800} alt="Plant" />
+                {/* <Image src="/p1s3.png" width={400} height={800} alt="Plant" /> */}
+                <PlantUpdate />
               </div>
             </div>
           </div>
@@ -140,12 +142,13 @@ export default function Home() {
               </div>
             </div>
             <div className="flex flex-col bg-white min-h-screen justify-center items-center px-16">
-              <Image
+              {/* <Image
                 src="/plant1stage1new.png"
                 alt="Plant"
                 width={500}
                 height={700}
-              />
+              /> */}
+              <PlantUpdate />
             </div>
           </div>
         </SignedOut>
