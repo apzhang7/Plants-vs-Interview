@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
+import ClientUserInfo from "../components/ClientUserInfo";
+import Navbar from "@/components/Navbar";
+import Link from 'next/link'
 import Image from "next/image";
 import CreateQuestion from "@/components/CreateQuestion";
 
@@ -56,21 +59,43 @@ export default function Home() {
       <CreateQuestion />
       <div className="items-center justify-center flex-grow">
         <SignedIn>
-          <div>
-            <p>Welcome, {user?.firstName}!</p>
+            <Navbar />
+            <div>
+              <div className="flex items-center justify-between p-40 -mt-35">
+                <div className="flex-1">
+                  <p className="text-black-600 font-bold"
+                  style={{ fontSize: "8vh" }}>
+                  Welcome,
+                  </p>
+                  <p className="font-bold -mt-12 bg-gradient-to-t from-green-600 to-green-100 text-transparent bg-clip-text"
+                    style={{ fontSize: "15vh" }}>
+                    {user?.firstName}
+                  </p>
 
-            {/* Display loading state or fetched Firestore data */}
-            {loading ? (
-              <p>Loading Firestore data...</p>
-            ) : firestoreData ? (
-              <div>
-                <h3>Firestore Data:</h3>
-                {/* <pre>{JSON.stringify(firestoreData, null, 2)}</pre> */}
+                  <p className="text-black-200"
+                  style={{fontSize: "4vh"}}>
+                    You haven't watered FINN today. <br></br>
+                    Help FINN by practicing!
+                  </p>
+                  <br></br>
+                
+                  <Link href="/question">     
+                    <button className="bg-green-200 text-black font-normal py-2 w-40 rounded-sm shadow-md hover:gray transition duration-300">
+                      Click to practice!
+                    </button>
+                  </Link>
+
+                </div>
+                <div className="flex justify-center items-center">
+                  <Image
+                    src="/p1s3.png"
+                    width={400}
+                    height={800}
+                    alt="Plant"
+                  />
+                </div>
               </div>
-            ) : (
-              <p>No Firestore data found.</p>
-            )}
-          </div>
+            </div>
           <SignOutButton />
         </SignedIn>
         <SignedOut>
@@ -89,12 +114,12 @@ export default function Home() {
               </h1>
               <div className="flex gap-4">
                 <SignUpButton mode="modal">
-                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md hover:gray transition duration-300">
+                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md">
                     sign up
                   </button>
                 </SignUpButton>
                 <SignInButton mode="modal">
-                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md hover:gray transition duration-300">
+                  <button className="bg-white text-black font-normal py-2 w-32 rounded-sm shadow-md">
                     log in
                   </button>
                 </SignInButton>

@@ -8,10 +8,9 @@ export default function ClientUserInfo() {
   return (
     <div className="flex gap-4">
       <SignedIn>
-        <span className="text-sm font-medium text-gray-700">
-          Welcome back, {user?.firstName || 'User'}!
-        </span>
-        <UserButton />
+        <div className='scale-250'>
+          <UserButton />
+        </div>
       </SignedIn>
 
       <SignedOut>
