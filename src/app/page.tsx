@@ -52,7 +52,7 @@ export default function Home() {
           });
       }
     }
-  }, [user]);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -92,7 +92,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <SignOutButton />
         </SignedIn>
         <SignedOut>
           <div className="flex justify-between bg-[#C1DEC3] min-h-screen items-center gap-8">
