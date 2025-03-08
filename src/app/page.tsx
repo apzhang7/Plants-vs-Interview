@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import ClientUserInfo from "../components/ClientUserInfo";
@@ -32,27 +32,46 @@ export default function Home() {
 
   const [firestoreData, setFirestoreData] = useState(null); // State to store Firestore data
   const [loading, setLoading] = useState(false); // Loading state for data fetch
+  const [newUser, setNewUser] = useState(false); // State to check if user is new
 
   useEffect(() => {
     if (user) {
-      const userData = {
-        email: user.emailAddresses[0]?.emailAddress || "",
-        fullname: `${user.firstName} ${user.lastName}` || "",
-      };
+      const userDocRef = doc(db, "users", user.id);
 
-      if (userData.email && userData.fullname) {
-        const userDocRef = doc(db, "users", user.id);
+      // First check if the user document already exists
+      getDoc(userDocRef)
+        .then((docSnap) => {
+          const userData = {
+            email: user.emailAddresses[0]?.emailAddress || "",
+            fullname: `${user.firstName} ${user.lastName}` || "",
+            lastLogin: new Date(),
+          };
 
-        setDoc(userDocRef, userData)
-          .then(() => {
-            console.log("User data stored successfully");
-          })
-          .catch((error) => {
-            console.error("Error storing user data:", error);
-          });
-      }
+          if (docSnap.exists()) {
+            // Document exists, update only the specific fields
+            updateDoc(userDocRef, userData)
+              .then(() => console.log("User data updated"))
+              .catch((error) =>
+                console.error("Error updating user data:", error)
+              );
+          } else {
+            // Document doesn't exist, create it with default values
+            setDoc(userDocRef, {
+              ...userData,
+              health: 5,
+              plantLevel: 1,
+              questionsAnswered: 0,
+              createdAt: new Date(),
+            })
+              .then(() => console.log("New user created"))
+              .catch((error) => console.error("Error creating user:", error));
+          }
+        })
+        .catch((error) =>
+          console.error("Error checking user document:", error)
+        );
     }
-  }, []);
+  }, [user]); // Add user to dependency array to run when user changes
 
   return (
     <div className="min-h-screen">
