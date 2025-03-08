@@ -52,7 +52,7 @@ export default function Home() {
           });
       }
     }
-  }, [user]);
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -82,7 +82,7 @@ export default function Home() {
                 <br></br>
 
                 <Link href="/question">
-                  <button className="bg-green-200 text-black font-normal py-2 w-40 rounded-sm shadow-md hover:gray transition duration-300">
+                  <button className="bg-green-200 text-black font-normal py-2 w-40 rounded-sm shadow-md hover:bg-green-300 transition duration-300">
                     Click to practice!
                   </button>
                 </Link>
@@ -92,7 +92,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <SignOutButton />
         </SignedIn>
         <SignedOut>
           <div className="flex justify-between bg-[#C1DEC3] min-h-screen items-center gap-8">
