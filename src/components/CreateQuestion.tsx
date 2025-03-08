@@ -25,6 +25,7 @@ const formSchema = z.object({
 export default function CreateQuestion() {
   const [questionResponse, setQuestionResponse] = useState("");
   const [questionLoading, setQuestionLoading] = useState(false);
+  const [questionText, setQuestionText] = useState("");
 
   const [userResponse, setUserResponse] = useState("");
   const [hasUserResponse, setHasUserResponse] = useState(false);
@@ -60,7 +61,14 @@ export default function CreateQuestion() {
 
       const data = await response.json();
       console.log("Question API response:", data);
+
+      // Store the formatted JSON for display
       setQuestionResponse(JSON.stringify(data, null, 2));
+
+      // Extract just the question text from the response
+      if (data.question) {
+        setQuestionText(data.question);
+      }
     } catch (error) {
       console.error("Question API error:", error);
       setQuestionResponse(`Error: ${error}`);
@@ -139,7 +147,7 @@ export default function CreateQuestion() {
 
       {hasUserResponse && (
         <CreateFeedback
-          question={questionResponse}
+          question={questionText} // Pass the question text instead of JSON string
           response={userResponse}
           industry={form.getValues("industry")}
           major={form.getValues("major")}
