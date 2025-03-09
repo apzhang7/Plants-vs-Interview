@@ -3,11 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useUser, SignInButton, SignUpButton, SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import ClientUserInfo from "../components/ClientUserInfo";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";

@@ -61,12 +61,24 @@ export default function Navbar() {
 
         {/* Right side: Hearts and User info */}
         <div className="flex items-center">
-          <div className="flex items-center text-2xl font-semibold text-red-600 mr-3 scale-150">
+          <div className="flex items-center mr-3 scale-150">
             ❤️
           </div>
-          <div className="flex text-2xl font-semibold text-red-600 mr-15">
+          <div className="flex text-2xl font-semibold text-red-600 mr-8">
             {health !== null ? health : "..."}
           </div>
+
+          {isSignedIn && user ? (
+            <Link href={`/profile/${user.id}`}>
+              <button className="bg-green-200 text-black font-normal py-3 mr-10 w-32 -mt-2 rounded-sm shadow-md hover:bg-green-300 transition duration-300">
+                My Profile
+              </button>
+            </Link>
+          ) : (
+                <button className="disabled bg-green-200 text-black font-normal py-3 mr-10 w-32 -mt-2 rounded-sm shadow-md hover:bg-green-300 transition duration-300 cursor-not-allowed">
+                  My Profile
+                </button>
+          )}
           <div>
             <ClientUserInfo />
           </div>
