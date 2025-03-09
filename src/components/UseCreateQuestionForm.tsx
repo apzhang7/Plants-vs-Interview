@@ -43,7 +43,13 @@ export function useQuestionForm() {
 
       const data = await response.json();
       console.log("Question API response:", data);
-      setQuestionResponse(JSON.stringify(data, null, 2));
+
+      // Store just the question text directly, not the JSON string
+      if (data && data.question) {
+        setQuestionResponse(data.question);
+      } else {
+        setQuestionResponse("Failed to generate a question");
+      }
     } catch (error) {
       console.error("Question API error:", error);
       setQuestionResponse(`Error: ${error}`);

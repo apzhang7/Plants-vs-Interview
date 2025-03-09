@@ -4,6 +4,8 @@ import { MessageCircleQuestion, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuestionForm } from "@/components/UseCreateQuestionForm";
+import { useBookmark } from "@/components/useBookmark";
+import { useFeedback } from "@/components/useFeedback";
 import PlantUpdate from "@/components/PlantFile";
 
 export default function NewQuestionPage() {
@@ -15,42 +17,18 @@ export default function NewQuestionPage() {
     handleQuestionSubmit,
   } = useQuestionForm();
   const [answer, setAnswer] = useState(""); // Stores the user's response
-  const [feedbackResponse, setFeedbackResponse] = useState(""); // Stores feedback
-  const [feedbackLoading, setFeedbackLoading] = useState(false); // Loading state for feedback
   // Assuming industry and major are collected via the form
   const industry = form.watch("industry");
   const major = form.watch("major");
-  // Function to handle feedback submission (mimics CreateFeedback's functionality)
-  const handleFeedbackSubmit = async () => {
-    if (!answer.trim()) return;
-    setFeedbackLoading(true);
-    try {
-      const response = await fetch("http://localhost:3000/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: questionResponse,
-          response: answer,
-          industry: industry,
-          major: major,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
-      }
-      const data = await response.json();
-      setFeedbackResponse(JSON.stringify(data, null, 2));
-      console.log("userResponse:", answer);
-      console.log("industry:", industry);
-      console.log("Feedback API response:", data);
-    } catch (error) {
-      setFeedbackResponse(`Error: ${error}`);
-    } finally {
-      setFeedbackLoading(false);
-    }
-  };
+  // Add the useBookmark hook
+  const { isBookmarked, handleBookmarkSubmit } = useBookmark();
+  const {
+    feedbackResponse,
+    feedbackLoading,
+    savedQuestionId,
+    handleFeedbackSubmit,
+  } = useFeedback();
+
   return (
     <div className="flex flex-col items-center p-4">
       {/* Main container with two halves: left for tree image and right for question box */}
@@ -88,26 +66,52 @@ export default function NewQuestionPage() {
             {/* Question Display Box */}
             <div className="p-4 rounded-lg bg-[#F2F2F2] max-w-[80%] min-h-[100px] mt-6 mb-4">
               <p className="text-[#B9B0B0]">
-                {questionResponse ? questionResponse : "Your generated question will appear here."}
+                {questionResponse
+                  ? typeof questionResponse === "string" &&
+                    questionResponse.startsWith("{")
+                    ? JSON.parse(questionResponse).question
+                    : questionResponse
+                  : "Your generated question will appear here."}
               </p>
             </div>
             {/* Buttons with Lucide Icons */}
-            <div className="flex justify-end space-x-4" style={{ maxWidth: "80%" }}>
+            <div
+              className="flex justify-end space-x-4"
+              style={{ maxWidth: "80%" }}
+            >
               <button
                 type="submit"
                 className="flex items-center space-x-2 text-[#B9B0B0] hover:text-opacity-100 focus:outline-none"
                 disabled={questionLoading}
               >
                 <MessageCircleQuestion className="w-6 h-6" />
-                <span>{questionLoading ? "Loading..." : "Generate Question"}</span>
+                <span>
+                  {questionLoading ? "Loading..." : "Generate Question"}
+                </span>
               </button>
               <button
                 type="button"
-                className="flex items-center space-x-2 text-[#B9B0B0] hover:text-opacity-100 focus:outline-none"
-                onClick={() => console.log("Bookmark clicked")}
+                className={`flex items-center space-x-2 text-[#B9B0B0] hover:text-opacity-100 focus:outline-none ${
+                  !savedQuestionId ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (savedQuestionId) {
+                    handleBookmarkSubmit({
+                      questionId: savedQuestionId,
+                      question: questionResponse,
+                      response: answer,
+                      industry,
+                      major,
+                    });
+                  }
+                }}
+                disabled={!savedQuestionId} // Disable if no question saved yet
               >
-                <BookmarkPlus className="w-6 h-6" />
-                <span>Bookmark</span>
+                <BookmarkPlus
+                  className={`w-6 h-6 ${isBookmarked ? "fill-yellow-400" : ""}`}
+                />
+                <span>{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
               </button>
             </div>
           </form>
@@ -121,11 +125,21 @@ export default function NewQuestionPage() {
           className="w-[75%] h-20 p-4 bg-[#ECFFE9] border border-gray-300 rounded-xl text-gray-500 text-opacity-50 placeholder-gray-500 placeholder-opacity-50"
           placeholder="Enter your response to the interview prompt here!"
         />
-        <p className="text-gray-400 text-sm mt-2">Hint: Longer answers are better most of the time!</p>
+        <p className="text-gray-400 text-sm mt-2">
+          Hint: Longer answers are better most of the time!
+        </p>
       </div>
       {/* Finish Button */}
       <button
-        onClick={handleFeedbackSubmit} // Now, the "I'm Finished" button triggers the feedback submission
+        onClick={(e) => {
+          e.preventDefault();
+          handleFeedbackSubmit({
+            question: questionResponse,
+            response: answer,
+            industry,
+            major,
+          });
+        }} // Now, the "I'm Finished" button triggers the feedback submission
         className="text-gray-700 bg-[#A1D1A5] px-8 py-3 rounded-full hover:bg-[#90C190] focus:outline-none mb-4"
         disabled={feedbackLoading} // Disable button while feedback is loading
       >
@@ -135,9 +149,46 @@ export default function NewQuestionPage() {
       {feedbackResponse && (
         <div className="mt-4 w-[75%]">
           <h3 className="font-bold text-lg">Feedback:</h3>
-          <pre className="bg-gray-100 p-3 rounded overflow-auto mt-2 text-sm">
-            {feedbackResponse}
-          </pre>
+          <div className="bg-gray-100 p-4 rounded mt-2">
+            {(() => {
+              // Parse the JSON string into an object
+              const feedback = JSON.parse(feedbackResponse);
+              return (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-green-600">Strengths:</h4>
+                    <p>{feedback.strengths}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-red-600">
+                      Areas for Improvement:
+                    </h4>
+                    <p>{feedback.weaknesses}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-blue-600">
+                      How to Improve:
+                    </h4>
+                    <p>{feedback.improvements}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold">Summary:</h4>
+                    <p>{feedback.summary}</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="font-bold text-lg">
+                      Score:{" "}
+                      <span className="text-purple-600">{feedback.score}</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </div>
       )}
     </div>
