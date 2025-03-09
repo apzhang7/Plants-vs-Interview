@@ -2,20 +2,63 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { doc, onSnapshot } from "firebase/firestore"; // Changed from getDoc
+import { db } from "../../../../firebase";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
+  const [health, setHealth] = useState<number | null>(null);
+  const { user, isSignedIn } = useUser(); // Clerk user authentication
   const [totalProblemsSolved, setTotalProblemsSolved] = useState(0);
+  const [lastPracticed, setLastPracticed] = useState("");
 
   useEffect(() => {
-    // Replace with actual data fetching logic
-    const fetchTotalProblemsSolved = async () => {
-      const response = await fetch("/api/totalProblemsSolved");
-      const data = await response.json();
-      setTotalProblemsSolved(data.count);
-    };
+    if (!user) return; // Exit if no user is logged in
+      // Set up a real-time listener instead of a one-time fetch
+      const userRef = doc(db, "users", user.id);
 
-    fetchTotalProblemsSolved();
-  }, []);
+      // This creates a subscription that updates whenever the data changes
+      const unsubscribe = onSnapshot(
+        userRef,
+        (docSnapshot) => {
+          if (docSnapshot.exists()) {
+            const userData = docSnapshot.data();
+            setHealth(userData.health || 5);
+            setTotalProblemsSolved(userData.questionsAnswered || 0);
+            
+            // Format timestamp into a readable date - removed weekday
+            if (userData.lastUpdated) {
+              const date = new Date(userData.lastUpdated.seconds * 1000);
+              setLastPracticed(date.toLocaleDateString("en-US", { 
+                year: "numeric", month: "long", day: "numeric" 
+              }));
+            } else {
+              // Set a default formatted date
+              const defaultDate = new Date();
+              setLastPracticed(defaultDate.toLocaleDateString("en-US", { 
+                year: "numeric", month: "long", day: "numeric" 
+              }));
+            }
+          } else {
+            // User doc doesn't exist yet, set default health
+            setHealth(5);
+            setTotalProblemsSolved(0);
+            
+            // Format the default date properly
+            const defaultDate = new Date();
+            setLastPracticed(defaultDate.toLocaleDateString("en-US", { 
+              year: "numeric", month: "long", day: "numeric" 
+            }));
+          }
+        },
+        (error) => {
+          console.error("Error getting updates", error);
+        }
+      );
+
+    // Clean up the listener when component unmounts
+    return () => unsubscribe();
+  }, [user]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white font-sans px-4">
@@ -26,12 +69,21 @@ export default function Home() {
         <div className="flex flex-col gap-6 w-full lg:w-1/3">
           <div className="flex flex-col items-start">
             <h2 className="text-xl md:text-2xl font-bold text-gray-500 mb-2">Your health bar</h2>
-            <div className="w-full h-10 md:h-12 lg:h-16 bg-gray-200 rounded-lg"></div>
+            <div className="w-full h-10 md:h-12 lg:h-16 bg-gray-200 rounded-lg">
+              <div className="flex text-2xl font-semibold text-red-600 align-center justify-center mt-4">
+                {health !== null ? "You have " + health + " health!" : "..."}
+              </div>
+
+            </div>
           </div>
 
           <div className="flex flex-col items-start">
             <h2 className="text-xl md:text-2xl font-bold text-gray-500 mb-2">Last practiced on:</h2>
-            <div className="w-full h-10 md:h-12 lg:h-16 bg-gray-200 rounded-lg"></div> 
+            <div className="w-full h-10 md:h-12 lg:h-16 bg-gray-200 rounded-lg">
+              <div className="flex font-semibold text-red-600 align-center justify-center mt-4">
+                {lastPracticed ? "You last practiced " + lastPracticed + "!" : "..."}
+              </div>
+            </div> 
           </div>
         </div>
 
@@ -79,19 +131,6 @@ export default function Home() {
       </div>
 
       {/* Centered, longer, rounded rectangle */}
-      {/* <div className="w-full max-w-7xl bg-gray-100 rounded-2xl py-6 md:py-8 px-6 md:px-8 shadow-lg mb-15"> 
-        {bookmarkedQuestions.length > 0 ? (
-          <div className="space-y-4">
-{bookmarkedQuestions.map((question, index) => (
-              <p key={index} className="text-lg md:text-2xl text-gray-700">{question}</p>
-            ))}
-          </div>
-        ) : (
-          <p className="text-lg md:text-2xl text-gray-700">No bookmarked questions</p>
-        )}
-      </div> */}
-
-        {/* Centered, longer, rounded rectangle */}
       <div className="w-full max-w-7xl bg-gray-100 rounded-2xl py-6 md:py-8 px-6 md:px-8 shadow-lg mb-15"> 
 
     <div className="space-y-4">
