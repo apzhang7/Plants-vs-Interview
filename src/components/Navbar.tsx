@@ -36,7 +36,6 @@ export default function Navbar() {
         if (docSnapshot.exists()) {
           const userData = docSnapshot.data();
           setHealth(userData.health || 5);
-          console.log("Health updated:", userData.health);
         } else {
           // User doc doesn't exist yet, set default health
           setHealth(5);
