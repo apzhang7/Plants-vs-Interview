@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuestionForm } from "@/components/UseCreateQuestionForm";
 import { useBookmark } from "@/components/useBookmark";
-import { useFeedback } from "@/components/useFeedback"; // Import the hook instead
+import { useFeedback } from "@/components/useFeedback";
+import PlantUpdate from "@/components/PlantFile";
 
 export default function NewQuestionPage() {
   const {
@@ -30,25 +31,11 @@ export default function NewQuestionPage() {
 
   return (
     <div className="flex flex-col items-center p-4">
-      {/* Top Bar with Title and Icons */}
-      <div className="flex justify-between w-full items-center mb-4">
-        <h1 className="text-2xl font-bold">Plants vs. Interview</h1>
-        <div className="flex space-x-4">
-          <div className="flex items-center">
-            <span className="text-yellow-500">★</span>
-            <span className="ml-2 text-lg">7</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-red-500">❤️</span>
-            <span className="ml-2 text-lg">5</span>
-          </div>
-        </div>
-      </div>
       {/* Main container with two halves: left for tree image and right for question box */}
       <div className="flex w-full mb-12">
         {/* Tree Image Section */}
         <div className="w-1/3 ml-8 flex justify-center items-center">
-          <img src="p1s1.png" alt="Tree" className="max-w-[54%] h-auto" />
+          <PlantUpdate width={300} height={400} />
         </div>
         {/* Right Section */}
         <div className="w-2/3 flex flex-col justify-start space-y-6 mt-24">
