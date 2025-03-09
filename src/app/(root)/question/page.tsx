@@ -51,20 +51,6 @@ export default function NewQuestionPage() {
   };
   return (
     <div className="flex flex-col items-center p-4">
-      {/* Top Bar with Title and Icons */}
-      <div className="flex justify-between w-full items-center mb-4">
-        <h1 className="text-2xl font-bold">Plants vs. Interview</h1>
-        <div className="flex space-x-4">
-          <div className="flex items-center">
-            <span className="text-yellow-500">★</span>
-            <span className="ml-2 text-lg">7</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-red-500">❤️</span>
-            <span className="ml-2 text-lg">5</span>
-          </div>
-        </div>
-      </div>
       {/* Main container with two halves: left for tree image and right for question box */}
       <div className="flex w-full mb-12">
         {/* Tree Image Section */}
