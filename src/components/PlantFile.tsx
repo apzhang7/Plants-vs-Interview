@@ -6,7 +6,7 @@ import { db } from "../firebase";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 
-export default function PlantUpdate() {
+export default function PlantUpdate({ width = 400, height = 800 }) {
   const [plantLevel, setPlantLevel] = useState(1); // Default to level 1
   const { user } = useUser(); // Get user info from Clerk
 
@@ -42,7 +42,5 @@ export default function PlantUpdate() {
     }
   };
 
-  return (
-    <Image src={getPlantImage()} width={400} height={800} alt="Plant" />
-  );
+  return <Image src={getPlantImage()} width={width} height={height} alt="Plant" />;
 }

@@ -108,7 +108,7 @@ export default function Home() {
               </div>
               <div className="flex justify-center items-center">
                 {/* <Image src="/p1s3.png" width={400} height={800} alt="Plant" /> */}
-                <PlantUpdate />
+                <PlantUpdate width={350} height={740}/>
               </div>
             </div>
           </div>

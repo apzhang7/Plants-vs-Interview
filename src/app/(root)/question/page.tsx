@@ -4,6 +4,8 @@ import { MessageCircleQuestion, BookmarkPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuestionForm } from "@/components/UseCreateQuestionForm";
+import PlantUpdate from "@/components/PlantFile";
+
 export default function NewQuestionPage() {
   const {
     form,
@@ -55,7 +57,7 @@ export default function NewQuestionPage() {
       <div className="flex w-full mb-12">
         {/* Tree Image Section */}
         <div className="w-1/3 ml-8 flex justify-center items-center">
-          <img src="p1s1.png" alt="Tree" className="max-w-[54%] h-auto" />
+          <PlantUpdate width={300} height={400} />
         </div>
         {/* Right Section */}
         <div className="w-2/3 flex flex-col justify-start space-y-6 mt-24">
