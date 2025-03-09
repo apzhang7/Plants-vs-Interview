@@ -17,7 +17,7 @@ export default async function updateUserAfterFeedback(
       let questionsAnswered = (userData.questionsAnswered || 0) + 1;
 
       // Update health based on feedback score
-      if (feedbackScore >= 8) {
+      if (feedbackScore >= 5) {
         currentHealth = Math.min(5, currentHealth + 1);
       } else if (feedbackScore <= 4) {
         currentHealth = Math.max(1, currentHealth - 1);
