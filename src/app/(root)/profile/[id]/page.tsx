@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { doc, onSnapshot } from "firebase/firestore"; // Changed from getDoc
 import { db } from "../../../../firebase";
 import { useUser } from "@clerk/nextjs";
+import PlantUpdate from "@/components/PlantFile";
 
 export default function Home() {
   const [health, setHealth] = useState<number | null>(null);
@@ -84,22 +85,16 @@ export default function Home() {
                 {lastPracticed ? "You last practiced " + lastPracticed + "!" : "..."}
               </div>
             </div> 
+
           </div>
         </div>
 
         {/* Center - Plant Image */}
-        <div className="flex-shrink-0 w-full max-w-xs md:max-w-sm lg:max-w-md">
-          <Image 
-            src="/p1s3.png" 
-            alt="Plant" 
-            width={400} 
-            height={400} 
-            className="object-contain w-full"
-          />
+        <div className="flex items-center justify-center w-full max-w-xs md:max-w-sm lg:max-w-md">
+          <PlantUpdate width={300} height={600} />
         </div>
       {/* Right Column - Progress */}
         <div className="flex flex-col items-center w-full lg:w-1/3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-500 mb-2">Problems Practiced:</h2>
           <div className="w-full min-h-[20vh] md:min-h-[25vh] lg:min-h-[30vh] bg-gray-200 rounded-lg flex flex-col items-center justify-center text-center p-4">
             <p className="text-lg md:text-xl font-medium text-gray-700">Total Problems Solved</p>
             <p className="text-3xl md:text-6xl font-bold text-gray-900">{totalProblemsSolved}</p>
