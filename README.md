@@ -1,4 +1,4 @@
-# Plants vs Interview - AI-Powered Mock Interview Assistant
+# Plants vs Interview - AI Mock Interview Assistant
 
 ### _About Our Project_
 
